@@ -6,10 +6,9 @@ def multiple_of(k: int):
 
 do_things = (
     Proc(lambda x: list(range(0, x)), "fetch parameters")
-    >> WfFor(Labelled(multiple_of(2) // multiple_of(3)))
-    >> Filter(Proc(lambda x: x[1][0] and x[1][1]))
-    >> WfFor(Proc(lambda x: x[0]))
-    >> WfFor(Proc(str, "str"), "str")
+    >> WfFor(Labelled(multiple_of(2) // multiple_of(3)), "Calculate modulo")
+    >> Filter(Proc(lambda x: x[1][0] and x[1][1], "and"))
+    >> WfFor(Labelled.l >> Proc(str, "str"))
     >> Proc(lambda l: ", ".join(l), "format")
 )
 

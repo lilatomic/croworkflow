@@ -39,9 +39,13 @@ class Interpreter:
 
 
 	@contextmanager
-	def frame(self, un: str, name: str) -> Interpreter:
-		subgraph = pydot.Subgraph(f"cluster_{un}", label=name)
-		self.graph.add_subgraph(subgraph)
+	def frame(self, op: Op, name: str) -> Interpreter:
+		un = self._node_id(op)
+		if hasattr(op, "label"):
+			subgraph = pydot.Subgraph(f"cluster_{un}", label=name)
+			self.graph.add_subgraph(subgraph)
+		else:
+			subgraph = self.graph
 		yield Interpreter(graph=subgraph, graph_root=self.graph_root, head=self.head)
 
 
@@ -66,7 +70,7 @@ class Interpreter:
 		elif isinstance(op, NOOP):
 			...
 		elif isinstance(op, WfSeq):
-			with self.frame(self._node_id(op), str(op)) as frame:
+			with self.frame(op, str(op)) as frame:
 				for op in op.ops:
 					value = frame.interpret(op, value)
 				self.head = frame.head
@@ -76,7 +80,8 @@ class Interpreter:
 			value = self._interpret_in_parallel(op, value, self.ParallelMode.WfPar)
 
 		elif isinstance(op, WfFor):
-			value = self._interpret_in_parallel(op, value, self.ParallelMode.WfFor)
+			with self.frame(op, str(op)) as frame:
+				value = self._interpret_in_parallel(op, value, self.ParallelMode.WfFor)
 		elif isinstance(op, WfConditional):
 			cond_result = self.interpret(op.cond, value)
 			if cond_result:
@@ -98,13 +103,13 @@ class Interpreter:
 		frames = []
 		if mode == self.ParallelMode.WfPar:
 			for proc in op.ops:
-				with self.frame(self._node_id(proc), str(proc)) as frame:
+				with self.frame(proc, str(proc)) as frame:
 					ret = frame.interpret(proc, value)
 					frames.append((frame, ret))
 		elif mode == self.ParallelMode.WfFor:
 			for v in value:
 				sub_op = deepcopy(op.op)
-				with self.frame(self._node_id(sub_op), str(sub_op)) as frame:
+				with self.frame(sub_op, str(sub_op)) as frame:
 					ret = frame.interpret(sub_op, v)
 					frames.append((frame, ret))
 		else:
