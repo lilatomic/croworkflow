@@ -11,7 +11,7 @@ from uuid import UUID, uuid4
 import pydot
 
 import ops
-from ops import Const, Op, Proc, Wf, WfBound, WfConditional, NOOP, OpGen, WfFor, WfPar, WfSeq
+from ops import Const, Labelled, Op, Proc, Wf, WfBound, WfConditional, NOOP, OpGen, WfFor, WfPar, WfSeq
 from _types import I, O
 
 
@@ -61,6 +61,8 @@ class Interpreter:
 			value = op(value)
 		elif isinstance(op, Const):
 			value = op.value
+		elif isinstance(op, Labelled):
+			value = (value, self.interpret(op.op, value))
 		elif isinstance(op, NOOP):
 			...
 		elif isinstance(op, WfSeq):
@@ -123,7 +125,11 @@ class Interpreter:
 
 	def _graph_node(self, n, value):
 		this_id = str(uuid4())
-		if not isinstance(n, NOOP):
+		if isinstance(n, NOOP):
+			return
+		if isinstance(n, Labelled):
+			return
+		else:
 			self.graph.add_node(pydot.Node(this_id, label = str(n)))
 			self.graph_root.add_edge(pydot.Edge(self.head, this_id, label=str(value)))
 

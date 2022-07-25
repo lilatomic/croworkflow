@@ -55,6 +55,11 @@ class Const(Op):
 		return str(self.value)
 
 
+class Labelled(Op):
+	"""Return a pair of the original value and the result of passing the value to op"""
+	def __init__(self, op: Op):
+		self.op = op
+
 class Wf(Op, abc.ABC):
 	def __init__(self, label: Optional[str] = None):
 		self.label = label
@@ -127,13 +132,13 @@ class GroupBy(OpGen):
 	@staticmethod
 	def aggregate(kv_pairs: List[T, I]) -> Dict[T, List[I]]:
 		out = defaultdict(list)
-		for k,v in kv_pairs:
-			out[k].append(v)
+		for value,keying in kv_pairs:
+			out[keying].append(value)
 		return out
 
 	def gen(self, value):
 		keying_wf = WfFor(
-			self.partitioner // NOOP(), label="GroupBy"
+			Labelled(self.partitioner), label="GroupBy"
 		)
 
 		return keying_wf >> Proc(self.aggregate, "GroupBy.aggregate")
@@ -164,6 +169,6 @@ class Filter(OpGen):
 			filter = Filter.filter_exclude
 
 		return WfFor(
-			NOOP() // self.predicate, label="Filter"
+			Labelled(self.predicate), label="Filter"
 		) >> Proc(filter)
 

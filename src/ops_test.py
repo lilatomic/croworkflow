@@ -37,16 +37,16 @@ class TestOperators:
 
 
 	def test_par_procs(self):
-		ops = self.proc0 / self.proc1
+		ops = self.proc0 // self.proc1
 		v = Interpreter().interpret(ops, 7)
 		assert v == (14, 12)
 
 	def test_par_wfs(self):
-		ops = self.seq0 / self.seq1
+		ops = self.seq0 // self.seq1
 		v = Interpreter().interpret(ops, 7)
 		assert v == (19, 24)
 
 	def test_par_mixed(self):
-		ops = self.seq0 / self.proc0
+		ops = self.seq0 // self.proc0
 		v = Interpreter().interpret(ops, 7)
 		assert v == (19, 14)

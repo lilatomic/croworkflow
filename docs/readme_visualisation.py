@@ -1,4 +1,4 @@
-from ops import Proc, Const, WfFor, Filter, NOOP
+from ops import Filter, Labelled, Proc, WfFor
 from interpreter import Interpreter
 
 def multiple_of(k: int):
@@ -6,7 +6,7 @@ def multiple_of(k: int):
 
 do_things = (
     Proc(lambda x: list(range(0, x)), "fetch parameters")
-    >> WfFor(NOOP() // (multiple_of(2) // multiple_of(3)))
+    >> WfFor(Labelled(multiple_of(2) // multiple_of(3)))
     >> Filter(Proc(lambda x: x[1][0] and x[1][1]))
     >> WfFor(Proc(lambda x: x[0]))
     >> WfFor(Proc(str), "str")
