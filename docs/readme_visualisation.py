@@ -9,8 +9,8 @@ do_things = (
     >> WfFor(Labelled(multiple_of(2) // multiple_of(3)))
     >> Filter(Proc(lambda x: x[1][0] and x[1][1]))
     >> WfFor(Proc(lambda x: x[0]))
-    >> WfFor(Proc(str), "str")
-    >> Proc(lambda l: ", ".join(l))
+    >> WfFor(Proc(str, "str"), "str")
+    >> Proc(lambda l: ", ".join(l), "format")
 )
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ class VirtualNode():
 		self.uuid = str(uuid4())
 
 	def __str__(self):
-		return f"<{self.label}-{id(self)}>"
+		return str(self.label)
 
 
 class Interpreter:
@@ -109,13 +109,13 @@ class Interpreter:
 					frames.append((frame, ret))
 		else:
 			raise TypeError("invalid parallel processing mode")
-		values = []
 		traces = []
+		values = []
 		for frame, ret in frames:
-			values.append(ret)
 			traces.append(frame)
+			values.append(ret)
 		merge_node = VirtualNode("gather")
-		self._graph_fan_in(traces, merge_node)
+		self._graph_fan_in(frames, merge_node)
 		self.head = merge_node.uuid
 		return tuple(values)
 
@@ -135,10 +135,8 @@ class Interpreter:
 
 			self.head = this_id
 
-
-
-	def _graph_fan_in(self, fans, n):
+	def _graph_fan_in(self, frames, n):
 		id_n  = n.uuid
 		self.graph.add_node(pydot.Node(id_n, label = str(n)))
-		for fan in fans:
-			self.graph_root.add_edge(pydot.Edge(fan.head, id_n))
+		for frame in frames:
+			self.graph_root.add_edge(pydot.Edge(frame[0].head, id_n, label=str(frame[1])))

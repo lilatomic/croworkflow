@@ -24,6 +24,12 @@ class Op(abc.ABC):
 		"""Run this and that in parallel"""
 		return WfPar((self, o,))
 
+	def __str__(self):
+		if hasattr(self, "label") and self.label:
+			return str(self.label)
+		else:
+			return str(self.__class__.__name__)
+
 
 class Proc(Op):
 	"""An operation"""
@@ -34,12 +40,6 @@ class Proc(Op):
 
 	def __call__(self, *args: Any, **kwds: Any) -> O:
 		return self.c(*args, **kwds)
-
-	def __str__(self):
-		if self.label:
-			return f"{self.label}<{id(self)}>"
-		else:
-			return f"proc<{id(self)}>"
 
 
 class NOOP(Op):
@@ -63,12 +63,6 @@ class Labelled(Op):
 class Wf(Op, abc.ABC):
 	def __init__(self, label: Optional[str] = None):
 		self.label = label
-
-	def __str__(self):
-		if self.label:
-			return f"{self.label}<{id(self)}>"
-		else:
-			return f"{self.__class__.__name__}<{id(self)}>"
 
 
 class WfSeq(Wf):
