@@ -60,6 +60,9 @@ class Labelled(Op):
 	def __init__(self, op: Op):
 		self.op = op
 
+	l = Proc(lambda x: x[0], "Labelled.label")
+	v = Proc(lambda x: x[1], "Labelled.value")
+
 class Wf(Op, abc.ABC):
 	def __init__(self, label: Optional[str] = None):
 		self.label = label
